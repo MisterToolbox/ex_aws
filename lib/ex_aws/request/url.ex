@@ -29,7 +29,7 @@ defmodule ExAws.Request.Url do
   end
 
   defp normalize_path(url) do
-    url |> Map.update(:path, "", &String.replace(&1, ~r/\/{2,}/, "/"))
+    url |> Map.update(:path, "", &String.replace(&1, ~r/\/{2,}$/, "/"))
   end
 
   defp convert_port_to_integer(url = %{port: port}) when is_binary(port) do

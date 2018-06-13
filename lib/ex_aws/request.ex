@@ -38,16 +38,16 @@ defmodule ExAws.Request do
       case config[:http_client].request(method, safe_url, req_body, full_headers, Map.get(config, :http_opts, [])) do
         {:ok, %{status_code: status} = resp} when status in 200..299 or status == 304 ->
           {:ok, resp}
+        {:ok, %{status_code: status} = resp} when status == 429 or status >= 500 ->
+          body = Map.get(resp, :body)
+          reason = {:http_error, status, body}
+          request_and_retry(method, url, service, config, headers, req_body, attempt_again?(attempt, reason, config))
         {:ok, %{status_code: status} = resp} when status in 400..499 ->
           case client_error(resp, config[:json_codec]) do
             {:retry, reason} ->
               request_and_retry(method, url, service, config, headers, req_body, attempt_again?(attempt, reason, config))
             {:error, reason} -> {:error, reason}
           end
-        {:ok, %{status_code: status} = resp} when status >= 500 ->
-          body = Map.get(resp, :body)
-          reason = {:http_error, status, body}
-          request_and_retry(method, url, service, config, headers, req_body, attempt_again?(attempt, reason, config))
         {:error, %{reason: reason}} ->
           Logger.warn("ExAws: HTTP ERROR: #{inspect reason}")
           request_and_retry(method, url, service, config, headers, req_body, attempt_again?(attempt, reason, config))

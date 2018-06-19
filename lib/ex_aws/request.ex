@@ -27,7 +27,9 @@ defmodule ExAws.Request do
     full_headers = ExAws.Auth.headers(method, url, service, config, headers, req_body)
 
     with {:ok, full_headers} <- full_headers do
-      safe_url = replace_spaces(url)
+      safe_url = url
+      |> replace_spaces
+      |> replace_colons
 
       if config[:debug_requests] do
         Logger.debug("Request URL: #{inspect safe_url}")
@@ -103,4 +105,6 @@ defmodule ExAws.Request do
   defp replace_spaces(url) do
     String.replace(url, " ", "%20")
   end
+
+  defp replace_colons(url), do: String.replace(url, ":", "%3A")
 end

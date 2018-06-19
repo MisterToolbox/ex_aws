@@ -106,5 +106,8 @@ defmodule ExAws.Request do
     String.replace(url, " ", "%20")
   end
 
-  defp replace_colons(url), do: String.replace(url, ":", "%3A")
+  defp replace_colons(url) do
+    components = String.split(url, "//")
+    List.first(components) <> "//" <> String.replace(List.last(components), ":", "%3A")
+  end
 end

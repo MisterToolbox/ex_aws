@@ -70,7 +70,7 @@ defmodule ExAws.Request do
               {:error, reason}
           end
 
-        {:ok, %{status_code: status} = resp} when status == 429 or status >= 500 ->
+        {:ok, %{status_code: status} = resp} when status >= 500 ->
           body = Map.get(resp, :body)
           reason = {:http_error, status, body}
 
@@ -124,6 +124,10 @@ defmodule ExAws.Request do
   end
 
   def handle_aws_error("ThrottlingException" = type, message) do
+    {:retry, {type, message}}
+  end
+
+  def handle_aws_error("TooManyRequests" = type, message) do
     {:retry, {type, message}}
   end
 

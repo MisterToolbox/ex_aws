@@ -4,6 +4,7 @@ defmodule ExAws.Auth.Utils do
   def uri_encode(url) do
     url
     |> String.replace("+", " ")
+    |> String.replace("%252F", "%2F")
     |> URI.encode(&valid_path_char?/1)
   end
 
